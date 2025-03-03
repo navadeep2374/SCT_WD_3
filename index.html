@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tic Tac Toe</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #f3a683, #786fa6);
+            color: white;
+        }
+        .container {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .hidden {
+            display: none;
+        }
+        .board {
+            display: grid;
+            grid-template-columns: repeat(3, 100px);
+            grid-template-rows: repeat(3, 100px);
+            gap: 5px;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 10px;
+            border-radius: 10px;
+        }
+        .cell {
+            width: 100px;
+            height: 100px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 2rem;
+            font-weight: bold;
+            border: 2px solid white;
+            background: rgba(255, 255, 255, 0.3);
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        .cell.disabled {
+            pointer-events: none;
+        }
+        .buttons {
+            margin-top: 20px;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 1rem;
+            cursor: pointer;
+            margin: 5px;
+            background: #ff4757;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            transition: 0.3s;
+        }
+        button:hover {
+            background: #e84118;
+        }
+        .popup {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            color: black;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div id="home" class="container">
+        <h1>Welcome to Tic-Tac-Toe</h1>
+        <button onclick="startGame()">Play</button>
+    </div>
+    
+    <div id="game" class="container hidden">
+        <h2 id="status">Player X's Turn</h2>
+        <div class="board" id="board"></div>
+        <div class="buttons">
+            <button id="reset" class="hidden" onclick="resetGame()">Reset</button>
+            <button id="back" class="hidden" onclick="goBack()">Back</button>
+        </div>
+    </div>
+    
+    <div id="winnerPopup" class="popup">
+        <h2 id="winnerMessage"></h2>
+        <button onclick="closePopup()">OK</button>
+    </div>
+    
+    <script>
+        let currentPlayer = "X";
+        let board = ["", "", "", "", "", "", "", "", ""];
+        let gameActive = true;
+        
+        function startGame() {
+            document.getElementById("home").classList.add("hidden");
+            document.getElementById("game").classList.remove("hidden");
+            initializeBoard();
+        }
+        
+        function initializeBoard() {
+            let boardElement = document.getElementById("board");
+            boardElement.innerHTML = "";
+            board = ["", "", "", "", "", "", "", "", ""];
+            gameActive = true;
+            currentPlayer = "X";
+            document.getElementById("status").innerText = "Player X's Turn";
+            document.getElementById("reset").classList.add("hidden");
+            document.getElementById("back").classList.add("hidden");
+            
+            board.forEach((_, index) => {
+                let cell = document.createElement("div");
+                cell.classList.add("cell");
+                cell.dataset.index = index;
+                cell.addEventListener("click", handleCellClick);
+                boardElement.appendChild(cell);
+            });
+        }
+        
+        function handleCellClick(event) {
+            let index = event.target.dataset.index;
+            if (board[index] === "" && gameActive) {
+                board[index] = currentPlayer;
+                event.target.innerText = currentPlayer;
+                event.target.classList.add("disabled");
+                checkWinner();
+                currentPlayer = currentPlayer === "X" ? "O" : "X";
+                document.getElementById("status").innerText = `Player ${currentPlayer}'s Turn`;
+            }
+        }
+        
+        function checkWinner() {
+            const winPatterns = [
+                [0, 1, 2], [3, 4, 5], [6, 7, 8],
+                [0, 3, 6], [1, 4, 7], [2, 5, 8],
+                [0, 4, 8], [2, 4, 6]
+            ];
+            
+            for (let pattern of winPatterns) {
+                let [a, b, c] = pattern;
+                if (board[a] && board[a] === board[b] && board[a] === board[c]) {
+                    document.getElementById("winnerMessage").innerText = `Winner: Player ${board[a]}`;
+                    document.getElementById("winnerPopup").style.display = "block";
+                    gameActive = false;
+                    showResetBackButtons();
+                    return;
+                }
+            }
+            
+            if (!board.includes("")) {
+                document.getElementById("winnerMessage").innerText = "It's a Tie!";
+                document.getElementById("winnerPopup").style.display = "block";
+                gameActive = false;
+                showResetBackButtons();
+            }
+        }
+        
+        function resetGame() {
+            initializeBoard();
+        }
+        
+        function goBack() {
+            document.getElementById("game").classList.add("hidden");
+            document.getElementById("home").classList.remove("hidden");
+        }
+        
+        function closePopup() {
+            document.getElementById("winnerPopup").style.display = "none";
+        }
+        
+        function showResetBackButtons() {
+            document.getElementById("reset").classList.remove("hidden");
+            document.getElementById("back").classList.remove("hidden");
+        }
+    </script>
+</body>
+</html>
